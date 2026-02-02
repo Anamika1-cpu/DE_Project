@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: employee_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: employee_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  spark:
+    image: jupyter/pyspark-notebook:latest
+    container_name: spark_container
+    depends_on:
+      - postgres
+    volumes:
+      - ./data:/home/jovyan/data
+      - ./spark/jobs:/home/jovyan/jobs
+      - ./spark/jars:/home/jovyan/jars
+    command: start.sh tail -f /dev/null
