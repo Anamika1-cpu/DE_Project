@@ -1,135 +1,108 @@
-Employee Data Pipeline – Spark & PostgreSQL (Dockerized)
-📌 Project Overview
+# Employee Data Pipeline – Spark & PostgreSQL (Dockerized)
 
-This project implements an end-to-end data engineering pipeline using Apache Spark and PostgreSQL, fully containerized with Docker.
+## 📌 Project Overview
+This repository implements an end-to-end data engineering pipeline using Apache Spark and PostgreSQL, fully containerized with Docker.
 
 The pipeline:
+- Generates raw employee data with intentional data quality issues
+- Cleans, validates, and transforms the data using Apache Spark
+- Loads the cleaned data into a PostgreSQL table
 
-Generates raw employee data with intentional data quality issues
+This project was developed as part of a Data Engineering assignment focused on real-world data processing scenarios.
 
-Cleans, validates, and transforms the data using Apache Spark
+---
 
-Loads the cleaned data into a PostgreSQL table
+## 🛠 Tech Stack
+- Apache Spark (PySpark) — data cleaning & transformations  
+- PostgreSQL — relational data storage  
+- Docker & Docker Compose — containerized environment  
+- Python — data generation & Spark job  
+- JDBC — Spark → PostgreSQL connectivity
 
-Demonstrates practical data engineering skills including data quality enforcement, transformations, and Docker orchestration
+---
 
-This project was developed as part of a Data Engineering Assignment focused on real-world data processing scenarios.
-
-🛠 Tech Stack
-
-Apache Spark (PySpark) – data cleaning & transformations
-
-PostgreSQL – relational data storage
-
-Docker & Docker Compose – containerized environment
-
-Python – data generation & Spark job
-
-JDBC – Spark → PostgreSQL connectivity
-
-🏗 Architecture
-employees_raw.csv
-        ↓
-Apache Spark (Data Cleaning & Transformation)
-        ↓
+## 🏗 Architecture
+employees_raw.csv  
+&nbsp;&nbsp;&nbsp;&nbsp;↓  
+Apache Spark (Data Cleaning & Transformation)  
+&nbsp;&nbsp;&nbsp;&nbsp;↓  
 employees_clean (PostgreSQL)
-
 
 All services (Spark & PostgreSQL) run inside Docker containers.
 
-📂 Project Structure
-employee-pipeline/ <br />
-│ <br />
-├── data/ <br />
-│   ├── employees_raw.csv <br />
-│   └── employees_clean_sample.csv <br />
-│ <br />
-├── postgres/ <br />
-│   └── init.sql <br />
-│ <br />
-├── scripts/ <br />
-│   └── generate_data.py <br />
-│ <br />
-├── spark/ <br />
-│   ├── jobs/ <br />
-│   │   └── employee_cleaning.py <br />
-│   └── jars/ <br />
-│       └── postgresql.jar <br />
-│ <br />
-├── docker-compose.yml <br />
-└── README.md <br />
+---
 
-🧪 Sample Data Generation
+## 📂 Project Structure
+```
+employee-pipeline/
+├── data/
+│   ├── employees_raw.csv
+│   └── employees_clean_sample.csv
+├── postgres/
+│   └── init.sql
+├── scripts/
+│   └── generate_data.py
+├── spark/
+│   ├── jobs/
+│   │   └── employee_cleaning.py
+│   └── jars/
+│       └── postgresql.jar
+├── docker-compose.yml
+└── README.md
+```
 
-The raw dataset is generated using Python + Faker.
+---
 
-Characteristics of the raw data:
+## 🧪 Sample Data Generation
+- Raw dataset is generated with Python + Faker
+- Characteristics:
+  - 1000+ employee records
+  - Duplicate `employee_id` values
+  - Missing critical fields
+  - Invalid email formats
+  - Future hire dates (logical errors)
+  - Salary values containing currency symbols and commas
+  - Mixed-case categorical values
+  - Nulls in non-critical columns
 
-1000+ employee records
+This simulates real-world dirty data for cleaning and validation practice.
 
-Duplicate employee_id values
+---
 
-Missing critical fields
+## 🔍 Data Cleaning & Transformations (Spark)
 
-Invalid email formats
+### Data Quality Checks
+- Removed duplicate records based on `employee_id`
+- Dropped records with missing mandatory fields
+- Filtered invalid email formats
+- Removed future or invalid hire dates
+- Handled unparseable numeric values safely
 
-Future hire dates (logical errors)
+### Transformations
+- Standardized names to Proper Case
+- Converted emails to lowercase
+- Cleaned salary values and converted to numeric
+- Explicit date parsing to avoid schema inference issues
+- Calculated:
+  - Employee age
+  - Tenure (years of service)
+- Created salary bands:
+  - `Junior`: < 50k
+  - `Mid`: 50k–80k
+  - `Senior`: > 80k
 
-Salary values with currency symbols and commas
+### Data Enrichment
+- Added `full_name` column
+- Extracted `email_domain`
+- Normalized `department` and `status` fields
 
-Mixed-case categorical values
+---
 
-Null values in non-critical columns
+## 🗄 Database Design
 
-This simulates real-world dirty data.
+Table: `employees_clean`
 
-🔍 Data Cleaning & Transformations (Spark)
-Data Quality Checks
-
-Removed duplicate records based on employee_id
-
-Dropped records with missing mandatory fields
-
-Filtered invalid email formats
-
-Removed future or invalid hire dates
-
-Handled unparseable numeric values
-
-Transformations
-
-Standardized names to Proper Case
-
-Converted emails to lowercase
-
-Cleaned salary values and converted to numeric
-
-Parsed dates explicitly to avoid schema inference issues
-
-Calculated:
-
-Employee age
-
-Tenure (years of service)
-
-Created salary bands:
-
-Junior: < 50k
-
-Mid: 50k–80k
-
-Senior: > 80k
-
-Data Enrichment
-
-Added full_name
-
-Extracted email_domain
-
-Normalized department and status fields
-
-🗄 Database Design
-Table: employees_clean
+```sql
 CREATE TABLE employees_clean (
     employee_id INTEGER PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -153,68 +126,71 @@ CREATE TABLE employees_clean (
     status VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-📊 Row Count Explanation (IMPORTANT)
-Stage	Record Count
-Raw input data	~1200
-Final cleaned data	637
-Why rows were reduced:
-
-Duplicate employee IDs
-
-Missing mandatory fields
-
-Invalid email formats
-
-Future or invalid hire dates
-
-Data type parsing failures
-
-This reduction is expected and intentional, demonstrating effective data quality enforcement.
-
-🚀 How to Run the Pipeline
-1️⃣ Generate Raw Data (Local Machine)
-py scripts/generate_data.py
-
-2️⃣ Start Docker Containers
-docker compose up -d
-
-
-Ensure both containers are running:
-
-spark_container
-
-employee_postgres
-
-3️⃣ Run Spark Job
 ```
+
+---
+
+## 📊 Row Count Explanation (IMPORTANT)
+
+| Stage              | Record Count |
+|--------------------|--------------|
+| Raw input data     | ~1200        |
+| Final cleaned data | 637          |
+
+Why rows were reduced:
+- Duplicate `employee_id`s
+- Missing mandatory fields
+- Invalid email formats
+- Future or invalid hire dates
+- Data type parsing failures
+
+This reduction is expected and demonstrates strong data quality enforcement.
+
+---
+
+## 🚀 How to Run the Pipeline
+
+1. Generate raw data (local machine)
+```bash
+python scripts/generate_data.py
+```
+
+2. Start Docker containers
+```bash
+docker compose up -d
+```
+Ensure both containers are running:
+- `spark_container`
+- `employee_postgres`
+
+3. Run Spark job
+```bash
 docker exec -it spark_container spark-submit \
   --jars /home/jovyan/jars/postgresql.jar \
   /home/jovyan/jobs/employee_cleaning.py
 ```
-```4️⃣ Verify Data in PostgreSQL
+
+4. Verify data in PostgreSQL
+```bash
 docker exec -it employee_postgres psql -U admin -d employee_db \
   -c "SELECT COUNT(*) FROM employees_clean;"
 ```
 
-🧯 Error Handling & Logging
+---
 
-Spark job logs record counts at each major stage
+## 🧯 Error Handling & Logging
+- Spark job logs record counts at each major stage
+- Explicit schema casting is applied before JDBC writes
+- Date parsing handled safely using defined formats
+- Common Spark–JDBC errors were diagnosed and addressed during development
 
-Explicit schema casting is applied before JDBC writes
+---
 
-Date parsing is handled safely using defined formats
+## 🧠 Key Learnings
+- Explicit schema handling in Spark is critical
+- Silent failures in date parsing can cause data loss
+- JDBC writes require strict data type alignment
+- Dockerized Spark environments can vary significantly by image
+- Real-world pipelines often discard large portions of bad data to maintain quality
 
-Common Spark–JDBC errors were handled and resolved during development
-
-🧠 Key Learnings
-
-Importance of explicit schema handling in Spark
-
-Silent failures in date parsing can cause data loss
-
-JDBC writes require strict data type alignment
-
-Dockerized Spark environments vary significantly across images
-
-Real-world pipelines often discard large portions of bad data
+---
