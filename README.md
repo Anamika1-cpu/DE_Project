@@ -38,26 +38,26 @@ employees_clean (PostgreSQL)
 All services (Spark & PostgreSQL) run inside Docker containers.
 
 📂 Project Structure
-employee-pipeline/
-│
-├── data/
-│   ├── employees_raw.csv
-│   └── employees_clean_sample.csv
-│
-├── postgres/
-│   └── init.sql
-│
-├── scripts/
-│   └── generate_data.py
-│
-├── spark/
-│   ├── jobs/
-│   │   └── employee_cleaning.py
-│   └── jars/
-│       └── postgresql.jar
-│
-├── docker-compose.yml
-└── README.md
+employee-pipeline/ <br />
+│ <br />
+├── data/ <br />
+│   ├── employees_raw.csv <br />
+│   └── employees_clean_sample.csv <br />
+│ <br />
+├── postgres/ <br />
+│   └── init.sql <br />
+│ <br />
+├── scripts/ <br />
+│   └── generate_data.py <br />
+│ <br />
+├── spark/ <br />
+│   ├── jobs/ <br />
+│   │   └── employee_cleaning.py <br />
+│   └── jars/ <br />
+│       └── postgresql.jar <br />
+│ <br />
+├── docker-compose.yml <br />
+└── README.md <br />
 
 🧪 Sample Data Generation
 
