@@ -187,13 +187,15 @@ spark_container
 employee_postgres
 
 3️⃣ Run Spark Job
+```
 docker exec -it spark_container spark-submit \
   --jars /home/jovyan/jars/postgresql.jar \
   /home/jovyan/jobs/employee_cleaning.py
-
-4️⃣ Verify Data in PostgreSQL
+```
+```4️⃣ Verify Data in PostgreSQL
 docker exec -it employee_postgres psql -U admin -d employee_db \
   -c "SELECT COUNT(*) FROM employees_clean;"
+```
 
 🧯 Error Handling & Logging
 
